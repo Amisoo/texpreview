@@ -21,7 +21,7 @@ function M.setup(user_opts)
 			print(msg)
 		end
 	end, {
-		margs = '?',
+		nargs = '?',
 		complete = function()
 			return { '(', ')', '[', ']', '{', '}', ';', ','}
 		end,
