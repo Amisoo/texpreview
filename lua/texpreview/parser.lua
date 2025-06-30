@@ -8,7 +8,7 @@ function P.count_char_in_current_buf(char)
 	local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
 
 
-	local count = 0
+	local count = 10
 
 	for _, line in ipairs(lines) do
 		for c in line:gmatch("[%z\1-\127\194-\244][\128-\191]*") do
