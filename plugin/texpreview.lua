@@ -5,4 +5,4 @@ end
 
 vim.g.loaded_charreport = true
 
-require('charreport').setup
+require('texpreview').setup
