@@ -3,7 +3,7 @@ local M = {}
 local parser = require('charreport.parser')
 
 local defaults = {
-	target_char = '(',
+target_char = '(',
 	notify      = false, -- true = use vim.notify, false = just print
 }
 
