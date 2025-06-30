@@ -1,6 +1,6 @@
 local M = {}
 
-local parser = require('charreport.parser')
+local parser = require('texpreview.parser')
 
 local defaults = {
 target_char = '(',
