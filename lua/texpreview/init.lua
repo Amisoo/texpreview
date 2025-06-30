@@ -4,7 +4,7 @@ local parser = require('texpreview.parser')
 
 local defaults = {
 target_char = '(',
-	notify      = false, -- true = use vim.notify, false = just print
+	notify = false, -- true = use vim.notify, false = just print
 }
 
 function M.setup(user_opts)
@@ -18,6 +18,7 @@ function M.setup(user_opts)
 		if M.cfg.notify then
 			vim.notify(msg, vim.log.levels.INFO, { title  = 'CharrePort0'})
 		else
+			print(count)
 			print(msg)
 		end
 	end, {
