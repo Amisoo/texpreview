@@ -1,6 +1,8 @@
 local M = {}
 
 local parser = require('texpreview.parser')
+local tex_compiler = require('texpreview.tex_formatter')
+local tex_viewer = require('texpreview.compiler_tex')
 
 local defaults = {
 target_char = '(',
@@ -14,13 +16,15 @@ function M.setup(user_opts)
 		if vim.bo.filetype == "tex" then
 			local isMath, s, e = parser.is_in_math_env()
 			if isMath then
-				print("Mais nonnnn!!! lesgo")
-				print(s[1])
-				print(s[2])
-				print("FIN")
-				print(e[1])
-				print(e[2])
-				print(e[2])
+				local bufnr = vim.api.nvim_get_current_buf()
+				local snippet = tex_compiler.slice_buffer(bufnr, s[1], s[2], e[1], e[2])
+				local tex_text = tex_compiler.make_tex(snippet)
+				print(tex_text)
+
+				tex_viewer.preview_math(tex_text)
+
+				-- local oui = tex_viewer.preview_math(tex_text)
+
 			else
 				print("On est pas en math dsl")
 			end

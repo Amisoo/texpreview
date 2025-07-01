@@ -64,9 +64,9 @@ function P.is_in_math_env()
 			local l = lines[i] 
 			for _, env in ipairs(math_envs) do 
 				local pattern = '\\end{' .. env
-				local s, e = string.find(l, 'align*')
+				local s, e = string.find(l, pattern)
 				if s then
-					return i, s, e + 1 , true
+					return i, s, e, true
 				end
 			end
 			-- check if we are in a math environment
@@ -93,12 +93,14 @@ function P.is_in_math_env()
 		if line_end then
 			-- In the case of a multiline equation
 			if line_start < line_end then
-				return true, {line_start, col_start_start} , {line_end, col_end_end}
+				print("test")
+				print(col_end_start)
+				return true, {line_start, col_start_start} , {line_end, col_end_start - 1}
 
 			-- In case where we have a inline begin environment
 			elseif line_start == line_end then
 				if col_start_end < col_end_start then
-					return true, {line_start, col_start_start} , {line_end, col_end_end}
+					return true, {line_start, col_start_start} , {line_end, col_end_start - 1}
 				else
 					return false, -1, -1
 				end
