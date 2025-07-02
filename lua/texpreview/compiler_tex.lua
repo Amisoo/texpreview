@@ -2,7 +2,7 @@ local P = {}
 local uv = vim.loop
 
 ---Compile snippet -> PDF (then SVG) and call cb(svg_path) on success
- local function compile_snippet(snippet, cb)
+ local function compile_snippet(snippet)
   local tmpdir = vim.fn.tempname():gsub("\\", "/")  -- win backslash fix
   vim.fn.mkdir(tmpdir)
   print(tmpdir)
@@ -19,11 +19,18 @@ local uv = vim.loop
 
   -- 1) lualatex
   print("la?")
-  local latex_cmd = { "lualatex", "-interaction=nonstopmode",
-                       "-output-directory", tmpdir, texfile }
-   os.execute(string.format(
-	  'pdflatex --output-format=dvi -jobname=%s %s', tmpdir, texfile
+  print(string.format('%s %s', tmpdir, texfile))
+
+  local handle = io.popen(string.format( 
+	'pdflatex -interaction=nonstopmode --output-format=dvi -output-directory=%s %s', tmpdir, texfile
+
   ))
+  local result = handle:read("*a")
+
+  handle:close()
+   --os.execute(string.format(
+	-- 'pdflatex -interaction=nonstopmode --output-format=dvi -jobname=%s %s', tmpdir, texfile
+  -- ))
   print("Toujours ici")
 
   os.execute(string.format( 
@@ -31,7 +38,9 @@ local uv = vim.loop
   ))
 
 
-  print("SVG written")
+  print("SVG written at ", svgfile, dvifile)
+
+  return svgfile
   --[[
   uv.spawn(latex_cmd[1], { args = vim.list_slice(latex_cmd, 2) }, function(code)
     if code ~= 0 then
@@ -60,13 +69,12 @@ end
 
  function P.preview_math(tex_text)
 	 print("on passe par ici")
-  	compile_snippet(tex_text, function(svg_path)
+  	local svg_path = compile_snippet(tex_text)
     -- send to your websocket or open in external viewer:
     -- 1) websocket
     --   require("texpreview.sender").send(snippet)   -- your existing flow
     -- 2) simple browser preview (Windows)
     os.execute(string.format('start "" "%s"', svg_path))
-  end)
 end
 
 
