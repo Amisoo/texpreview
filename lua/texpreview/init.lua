@@ -18,8 +18,8 @@ function M.setup(user_opts)
 			if isMath then
 				local bufnr = vim.api.nvim_get_current_buf()
 				local snippet = tex_compiler.slice_buffer(bufnr, s[1], s[2], e[1], e[2])
-				print(snippet)
 				local tex_text = tex_compiler.make_tex(snippet)
+
 				print(tex_text)
 
 				tex_viewer.preview_math(tex_text)

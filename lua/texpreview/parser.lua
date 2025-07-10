@@ -1,5 +1,4 @@
 local P = {}
-
 function P.is_in_math_env()
 
 	local row, col = unpack(vim.api.nvim_win_get_cursor(0)) -- index of the current position of the cursor
@@ -16,14 +15,12 @@ function P.is_in_math_env()
 	local _, dollar_count = beforeCursor:gsub("%$", "")
 	local start_line = math.max(1, row - 5)
 
-	local lines = vim.api.nvim_buf_get_lines(bufnr, start_line - 1, row - 1, false)
+	local lines = vim.api.nvim_buf_get_lines(bufnr, start_line, -1, false)
 
 	for _, line in ipairs(lines) do
-		print(line)
 		local _, count = line:gsub("%$", "")
 		dollar_count = dollar_count + count
 	end
-	print(dollar_count)
 
 	if dollar_count % 2 == 1 then
 		local col_start_start = -1
@@ -66,20 +63,31 @@ function P.is_in_math_env()
 		else
 		end
 	end
+	-- We need to put the one first the * first
+	local math_envs = {'equation*',
+				'equation',
+				'align*',
+				'align',
+				'multiline',
+				'gather',
+				'eqnarray'} 
 
-	local math_envs = {'equation', 'equation*', 'align', 'align*', 'multiline', 'gather', 'eqnarray'}
+	local lines_env = vim.api.nvim_buf_get_lines(bufnr, 1, row, false)
+
 
 	local function find_begin()
 		-- Check if we are in a begin environment
-		for i = row, 1, -1 do
-			local l = lines[i]
-			for _, env in ipairs(math_envs) do
+		for i = #lines_env, 1, -1 do
+			local l = lines_env[i]
+			for idx, env in ipairs(math_envs) do
 				local pattern = '\\begin{' .. env
-
 				local s, e = string.find(l, pattern)
 				if s then
 					-- return line number, start col and end col
-					return i, s, e, true
+					if idx % 2 == 0 then
+					return  i + 1, s, e + 1, true -- this means we are not in a * env
+					end
+					return  i + 1, s, e + 2, true  -- this means that we are in a * env
 				end
 			end
 			-- check if we are in a math environment 
@@ -91,7 +99,7 @@ function P.is_in_math_env()
 			end
 
 			if s then
-				return i, s, e, false
+				return i + 1, s, e, false
 			end
 
 		end
@@ -100,9 +108,10 @@ function P.is_in_math_env()
 
 
 	local function find_end()
+		local lines_env = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
 		-- Check if we are in a end environment
-		for i = row, #lines, 1 do 
-			local l = lines[i] 
+		for i = row, #lines_env, 1 do 
+			local l = lines_env[i] 
 			for _, env in ipairs(math_envs) do 
 				local pattern = '\\end{' .. env
 				local s, e = string.find(l, pattern)
@@ -134,12 +143,12 @@ function P.is_in_math_env()
 		if line_end then
 			-- In the case of a multiline equation
 			if line_start < line_end then
-				return true, {line_start, col_start_start} , {line_end, col_end_start - 1}
+				return true, {line_start, col_start_end + 1} , {line_end, col_end_start - 1}
 
 			-- In case where we have a inline begin environment
 			elseif line_start == line_end then
 				if col_start_end < col_end_start then
-					return true, {line_start, col_start_start} , {line_end, col_end_start - 1}
+					return true, {line_start, col_start_start + 1} , {line_end, col_end_start - 1}
 				else
 					return false, -1, -1
 				end
