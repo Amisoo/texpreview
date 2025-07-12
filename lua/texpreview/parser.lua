@@ -1,19 +1,20 @@
 local P = {}
 function P.is_in_math_env()
 
+	-- current position of the cursor
 	local row, col = unpack(vim.api.nvim_win_get_cursor(0)) -- index of the current position of the cursor
-
 	local bufnr = vim.api.nvim_get_current_buf()
 
+	-- stores all the lines
 	local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-
+	-- current line
 	local line = lines[row]
 
 
 	-- Check inline math with '$ ... $ ' in the current line before the current cursor until 5 lines above
+	local start_line = math.max(1, row - 5)
 	local beforeCursor = line:sub(1, col)
 	local _, dollar_count = beforeCursor:gsub("%$", "")
-	local start_line = math.max(1, row - 5)
 
 	local lines = vim.api.nvim_buf_get_lines(bufnr, start_line, -1, false)
 
@@ -85,7 +86,7 @@ function P.is_in_math_env()
 				if s then
 					-- return line number, start col and end col
 					if idx % 2 == 0 then
-					return  i + 1, s, e + 1, true -- this means we are not in a * env
+						return  i + 1, s, e + 1, true -- this means we are not in a * env
 					end
 					return  i + 1, s, e + 2, true  -- this means that we are in a * env
 				end
@@ -143,12 +144,13 @@ function P.is_in_math_env()
 		if line_end then
 			-- In the case of a multiline equation
 			if line_start < line_end then
+				print(col_start_end)
 				return true, {line_start, col_start_end + 1} , {line_end, col_end_start - 1}
 
 			-- In case where we have a inline begin environment
 			elseif line_start == line_end then
 				if col_start_end < col_end_start then
-					return true, {line_start, col_start_start + 1} , {line_end, col_end_start - 1}
+					return true, {line_start, col_start_end + 1} , {line_end, col_end_start - 1}
 				else
 					return false, -1, -1
 				end
